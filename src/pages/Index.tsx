@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -23,32 +23,43 @@ interface Website {
   image: string;
 }
 
+const DEFAULT_WEBSITES: Website[] = [
+  {
+    id: 1,
+    title: 'Яндекс.Директ',
+    url: 'https://direct.yandex.ru',
+    description: 'Контекстная реклама от Яндекса с высокой конверсией',
+    image: 'https://placehold.co/400x200/0EA5E9/ffffff?text=Yandex'
+  },
+  {
+    id: 2,
+    title: 'Google AdSense',
+    url: 'https://adsense.google.com',
+    description: 'Монетизация сайта с помощью рекламы Google',
+    image: 'https://placehold.co/400x200/1A1F2C/ffffff?text=Google'
+  }
+];
+
+const DEFAULT_AD_BLOCKS: AdBlock[] = [
+  { id: 1, code: '', position: 'Верхний блок' },
+  { id: 2, code: '', position: 'Боковой блок 1' },
+  { id: 3, code: '', position: 'Центральный блок' },
+  { id: 4, code: '', position: 'Боковой блок 2' },
+  { id: 5, code: '', position: 'Нижний блок' }
+];
+
 const Index = () => {
   const { toast } = useToast();
-  const [adBlocks, setAdBlocks] = useState<AdBlock[]>([
-    { id: 1, code: '', position: 'Верхний блок' },
-    { id: 2, code: '', position: 'Боковой блок 1' },
-    { id: 3, code: '', position: 'Центральный блок' },
-    { id: 4, code: '', position: 'Боковой блок 2' },
-    { id: 5, code: '', position: 'Нижний блок' }
-  ]);
+  
+  const [adBlocks, setAdBlocks] = useState<AdBlock[]>(() => {
+    const saved = localStorage.getItem('adBlocks');
+    return saved ? JSON.parse(saved) : DEFAULT_AD_BLOCKS;
+  });
 
-  const [websites, setWebsites] = useState<Website[]>([
-    {
-      id: 1,
-      title: 'Яндекс.Директ',
-      url: 'https://direct.yandex.ru',
-      description: 'Контекстная реклама от Яндекса с высокой конверсией',
-      image: 'https://placehold.co/400x200/0EA5E9/ffffff?text=Yandex'
-    },
-    {
-      id: 2,
-      title: 'Google AdSense',
-      url: 'https://adsense.google.com',
-      description: 'Монетизация сайта с помощью рекламы Google',
-      image: 'https://placehold.co/400x200/1A1F2C/ffffff?text=Google'
-    }
-  ]);
+  const [websites, setWebsites] = useState<Website[]>(() => {
+    const saved = localStorage.getItem('websites');
+    return saved ? JSON.parse(saved) : DEFAULT_WEBSITES;
+  });
 
   const [editingBlock, setEditingBlock] = useState<AdBlock | null>(null);
   const [tempCode, setTempCode] = useState('');
@@ -65,6 +76,14 @@ const Index = () => {
     setEditingBlock(block);
     setTempCode(block.code);
   };
+
+  useEffect(() => {
+    localStorage.setItem('websites', JSON.stringify(websites));
+  }, [websites]);
+
+  useEffect(() => {
+    localStorage.setItem('adBlocks', JSON.stringify(adBlocks));
+  }, [adBlocks]);
 
   const saveAdCode = () => {
     if (editingBlock) {
