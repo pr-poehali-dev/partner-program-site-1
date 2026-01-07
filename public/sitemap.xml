@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+  <url>
+    <loc>https://partner-program-site-1.poehali.dev/</loc>
+    <lastmod>2026-01-07</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+    <image:image>
+      <image:loc>https://cdn.poehali.dev/projects/4e9bdc86-c875-4c04-97bb-326323e13596/files/og-image-1767794462289.jpg</image:loc>
+      <image:title>Партнерские программы для заработка в интернете</image:title>
+      <image:caption>Проверенные партнерские программы, РСЯ, монетизация сайтов</image:caption>
+    </image:image>
+  </url>
+</urlset>

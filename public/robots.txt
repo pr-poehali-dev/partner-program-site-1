@@ -1,8 +1,19 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /admin/
+
 User-agent: Googlebot
 Allow: /
+Crawl-delay: 0
 
 User-agent: Bingbot
 Allow: /
+Crawl-delay: 0
+
+User-agent: Yandex
+Allow: /
+Crawl-delay: 0
 
 User-agent: Twitterbot
 Allow: /
@@ -10,5 +21,7 @@ Allow: /
 User-agent: facebookexternalhit
 Allow: /
 
-User-agent: *
-Allow: /
+Sitemap: https://partner-program-site-1.poehali.dev/sitemap.xml
+
+# SEO optimized for partner programs and monetization
+Host: partner-program-site-1.poehali.dev
