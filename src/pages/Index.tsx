@@ -2,7 +2,9 @@ import { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Label } from '@/components/ui/label';
 import Icon from '@/components/ui/icon';
 import { useToast } from '@/hooks/use-toast';
@@ -11,6 +13,14 @@ interface AdBlock {
   id: number;
   code: string;
   position: string;
+}
+
+interface Website {
+  id: number;
+  title: string;
+  url: string;
+  description: string;
+  image: string;
 }
 
 const Index = () => {
@@ -23,8 +33,33 @@ const Index = () => {
     { id: 5, code: '', position: 'Нижний блок' }
   ]);
 
+  const [websites, setWebsites] = useState<Website[]>([
+    {
+      id: 1,
+      title: 'Яндекс.Директ',
+      url: 'https://direct.yandex.ru',
+      description: 'Контекстная реклама от Яндекса с высокой конверсией',
+      image: 'https://placehold.co/400x200/0EA5E9/ffffff?text=Yandex'
+    },
+    {
+      id: 2,
+      title: 'Google AdSense',
+      url: 'https://adsense.google.com',
+      description: 'Монетизация сайта с помощью рекламы Google',
+      image: 'https://placehold.co/400x200/1A1F2C/ffffff?text=Google'
+    }
+  ]);
+
   const [editingBlock, setEditingBlock] = useState<AdBlock | null>(null);
   const [tempCode, setTempCode] = useState('');
+  const [editingWebsite, setEditingWebsite] = useState<Website | null>(null);
+  const [isAddingWebsite, setIsAddingWebsite] = useState(false);
+  const [websiteForm, setWebsiteForm] = useState({
+    title: '',
+    url: '',
+    description: '',
+    image: ''
+  });
 
   const openEditor = (block: AdBlock) => {
     setEditingBlock(block);
@@ -55,6 +90,60 @@ const Index = () => {
     });
   };
 
+  const openWebsiteEditor = (website: Website) => {
+    setEditingWebsite(website);
+    setWebsiteForm({
+      title: website.title,
+      url: website.url,
+      description: website.description,
+      image: website.image
+    });
+    setIsAddingWebsite(false);
+  };
+
+  const openWebsiteAdder = () => {
+    setEditingWebsite(null);
+    setWebsiteForm({
+      title: '',
+      url: '',
+      description: '',
+      image: 'https://placehold.co/400x200/0EA5E9/ffffff?text=New+Site'
+    });
+    setIsAddingWebsite(true);
+  };
+
+  const saveWebsite = () => {
+    if (editingWebsite) {
+      setWebsites(websites.map(site => 
+        site.id === editingWebsite.id ? { ...site, ...websiteForm } : site
+      ));
+      toast({
+        title: "Сайт обновлен",
+        description: `"${websiteForm.title}" успешно обновлен`,
+      });
+    } else if (isAddingWebsite) {
+      const newWebsite: Website = {
+        id: Math.max(...websites.map(w => w.id), 0) + 1,
+        ...websiteForm
+      };
+      setWebsites([...websites, newWebsite]);
+      toast({
+        title: "Сайт добавлен",
+        description: `"${websiteForm.title}" добавлен в список`,
+      });
+    }
+    setEditingWebsite(null);
+    setIsAddingWebsite(false);
+  };
+
+  const deleteWebsite = (id: number) => {
+    setWebsites(websites.filter(site => site.id !== id));
+    toast({
+      title: "Сайт удален",
+      description: "Сайт удален из списка",
+    });
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b border-border">
@@ -76,10 +165,195 @@ const Index = () => {
               Максимизируй доход через проверенные партнерские программы и эффективную рекламу
             </p>
             <div className="flex gap-4 justify-center pt-4">
-              <Button size="lg" className="text-lg px-8">
-                <Icon name="Rocket" size={20} className="mr-2" />
-                Начать сейчас
-              </Button>
+              <Sheet>
+                <SheetTrigger asChild>
+                  <Button size="lg" className="text-lg px-8">
+                    <Icon name="Rocket" size={20} className="mr-2" />
+                    Начать сейчас
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="right" className="w-full sm:max-w-2xl overflow-y-auto">
+                  <SheetHeader>
+                    <SheetTitle>Партнерские сайты</SheetTitle>
+                    <SheetDescription>
+                      Управляйте списком партнерских сайтов и программ
+                    </SheetDescription>
+                  </SheetHeader>
+                  
+                  <div className="mt-6 space-y-4">
+                    <Button onClick={openWebsiteAdder} className="w-full">
+                      <Icon name="Plus" size={20} className="mr-2" />
+                      Добавить новый сайт
+                    </Button>
+
+                    <div className="space-y-4">
+                      {websites.map((website) => (
+                        <Card key={website.id} className="overflow-hidden">
+                          <div className="aspect-[2/1] bg-muted">
+                            <img 
+                              src={website.image} 
+                              alt={website.title}
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                          <div className="p-4 space-y-3">
+                            <h4 className="font-semibold text-lg">{website.title}</h4>
+                            <p className="text-sm text-muted-foreground">{website.description}</p>
+                            <a 
+                              href={website.url} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="text-sm text-primary hover:underline flex items-center gap-1"
+                            >
+                              <Icon name="ExternalLink" size={14} />
+                              {website.url}
+                            </a>
+                            <div className="flex gap-2 pt-2">
+                              <Dialog>
+                                <DialogTrigger asChild>
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm" 
+                                    onClick={() => openWebsiteEditor(website)}
+                                    className="flex-1"
+                                  >
+                                    <Icon name="Edit" size={16} className="mr-1" />
+                                    Редактировать
+                                  </Button>
+                                </DialogTrigger>
+                                <DialogContent className="max-w-lg">
+                                  <DialogHeader>
+                                    <DialogTitle>Редактировать сайт</DialogTitle>
+                                    <DialogDescription>
+                                      Измените информацию о партнерском сайте
+                                    </DialogDescription>
+                                  </DialogHeader>
+                                  <div className="space-y-4 py-4">
+                                    <div className="space-y-2">
+                                      <Label htmlFor="title">Название</Label>
+                                      <Input
+                                        id="title"
+                                        value={websiteForm.title}
+                                        onChange={(e) => setWebsiteForm({...websiteForm, title: e.target.value})}
+                                        placeholder="Название сайта"
+                                      />
+                                    </div>
+                                    <div className="space-y-2">
+                                      <Label htmlFor="url">URL</Label>
+                                      <Input
+                                        id="url"
+                                        value={websiteForm.url}
+                                        onChange={(e) => setWebsiteForm({...websiteForm, url: e.target.value})}
+                                        placeholder="https://example.com"
+                                      />
+                                    </div>
+                                    <div className="space-y-2">
+                                      <Label htmlFor="description">Описание</Label>
+                                      <Textarea
+                                        id="description"
+                                        value={websiteForm.description}
+                                        onChange={(e) => setWebsiteForm({...websiteForm, description: e.target.value})}
+                                        placeholder="Краткое описание"
+                                        rows={3}
+                                      />
+                                    </div>
+                                    <div className="space-y-2">
+                                      <Label htmlFor="image">URL изображения</Label>
+                                      <Input
+                                        id="image"
+                                        value={websiteForm.image}
+                                        onChange={(e) => setWebsiteForm({...websiteForm, image: e.target.value})}
+                                        placeholder="https://example.com/image.jpg"
+                                      />
+                                    </div>
+                                    <div className="flex gap-2 justify-end">
+                                      <DialogTrigger asChild>
+                                        <Button variant="outline">Отмена</Button>
+                                      </DialogTrigger>
+                                      <DialogTrigger asChild>
+                                        <Button onClick={saveWebsite}>
+                                          <Icon name="Save" size={16} className="mr-1" />
+                                          Сохранить
+                                        </Button>
+                                      </DialogTrigger>
+                                    </div>
+                                  </div>
+                                </DialogContent>
+                              </Dialog>
+                              <Button 
+                                variant="ghost" 
+                                size="sm"
+                                onClick={() => deleteWebsite(website.id)}
+                              >
+                                <Icon name="Trash2" size={16} />
+                              </Button>
+                            </div>
+                          </div>
+                        </Card>
+                      ))}
+                    </div>
+                  </div>
+
+                  {isAddingWebsite && (
+                    <Dialog open={isAddingWebsite} onOpenChange={setIsAddingWebsite}>
+                      <DialogContent className="max-w-lg">
+                        <DialogHeader>
+                          <DialogTitle>Добавить новый сайт</DialogTitle>
+                          <DialogDescription>
+                            Заполните информацию о партнерском сайте
+                          </DialogDescription>
+                        </DialogHeader>
+                        <div className="space-y-4 py-4">
+                          <div className="space-y-2">
+                            <Label htmlFor="new-title">Название</Label>
+                            <Input
+                              id="new-title"
+                              value={websiteForm.title}
+                              onChange={(e) => setWebsiteForm({...websiteForm, title: e.target.value})}
+                              placeholder="Название сайта"
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="new-url">URL</Label>
+                            <Input
+                              id="new-url"
+                              value={websiteForm.url}
+                              onChange={(e) => setWebsiteForm({...websiteForm, url: e.target.value})}
+                              placeholder="https://example.com"
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="new-description">Описание</Label>
+                            <Textarea
+                              id="new-description"
+                              value={websiteForm.description}
+                              onChange={(e) => setWebsiteForm({...websiteForm, description: e.target.value})}
+                              placeholder="Краткое описание"
+                              rows={3}
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="new-image">URL изображения</Label>
+                            <Input
+                              id="new-image"
+                              value={websiteForm.image}
+                              onChange={(e) => setWebsiteForm({...websiteForm, image: e.target.value})}
+                              placeholder="https://example.com/image.jpg"
+                            />
+                          </div>
+                          <div className="flex gap-2 justify-end">
+                            <Button variant="outline" onClick={() => setIsAddingWebsite(false)}>Отмена</Button>
+                            <Button onClick={saveWebsite}>
+                              <Icon name="Plus" size={16} className="mr-1" />
+                              Добавить
+                            </Button>
+                          </div>
+                        </div>
+                      </DialogContent>
+                    </Dialog>
+                  )}
+                </SheetContent>
+              </Sheet>
               <Button size="lg" variant="outline" className="text-lg px-8">
                 <Icon name="BookOpen" size={20} className="mr-2" />
                 Узнать больше
